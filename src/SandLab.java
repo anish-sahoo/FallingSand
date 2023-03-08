@@ -16,6 +16,7 @@ public class SandLab
     public static final int WATER = 3;
     public static final int LAVA = 4;
     public static final int STEAM = 5;
+    public static int INVERT = 6;
     static int VALUE = 1;
 
     //do not add any more fields
@@ -25,12 +26,14 @@ public class SandLab
     public SandLab(int numRows, int numCols)
     {
         String[] names;
-        names = new String[5];
+        names = new String[6];
         names[EMPTY] = "Empty";
         names[METAL] = "Metal";
         names[SAND] = "Sand";
         names[WATER] = "Water";
         names[LAVA] = "Lava";
+        names[INVERT-1] = "Invert";
+
         display = new SandDisplay("Falling Sand", numRows, numCols, names);
         grid = new int[numRows][numCols];
     }
@@ -38,10 +41,9 @@ public class SandLab
     //called when the user clicks on a location using the given tool
     private void locationClicked(int row, int col, int tool)
     {
-        if(grid[row][col] == EMPTY && tool != EMPTY) {
+        if (grid[row][col] == EMPTY && tool != EMPTY) {
             grid[row][col] = tool;
-        }
-        else if(tool == EMPTY){
+        } else if (tool == EMPTY) {
             grid[row][col] = EMPTY;
         }
     }
@@ -260,21 +262,12 @@ public class SandLab
         } //reduce steam
     }
 
-    public void step2()
-    {
-        int val = 1;
+    public void step_neg() {
+        int val = -1;
         Random a = new Random(); int row, col;
-        if(VALUE == -1) {
-            val = -1;
-            row = a.nextInt(-val,grid.length-1);
-            col = a.nextInt(grid[0].length);
-        }
-        else {
-            val = 1;
-            row = a.nextInt(grid.length-1);
-            col = a.nextInt(grid[0].length);
-        }
-
+        //row = a.nextInt(1,grid.length-1);
+        row = a.nextInt(1,grid.length-1);
+        col = a.nextInt(grid[0].length);
         if(grid[row][col] == SAND) {
             if (grid[row + val][col] == LAVA) {
                 grid[row][col] = LAVA;
@@ -319,13 +312,15 @@ public class SandLab
                 } //general case
             }
         }
-        if(grid[row+val][col] == WATER){
-            int lr = a.nextInt(0,3); //decide which way to move
-            if(col == 0){
-                lr = a.nextInt(1,3);
+
+        row = a.nextInt(1,grid.length);
+        if(grid[row][col] == WATER){
+            int lr = a.nextInt(0, 3); //decide which way to move
+            if (col == 0) {
+                lr = a.nextInt(1, 3);
             } //edge case left
-            if(col == grid[0].length-1){
-                lr = 1 + (int) Math.pow(-1,a.nextInt(10));
+            if (col == grid[0].length - 1) {
+                lr = 1 + (int) Math.pow(-1, a.nextInt(10));
             } //edge case right
             switch (lr) {
                 case 0 -> { //move left
@@ -347,17 +342,19 @@ public class SandLab
                     }
                 }
                 case 2 -> {
-                    if (grid[row + val][col] == LAVA) {
-                        grid[row + val][col] = STEAM;
-                        grid[row][col] = SAND;
-                    } else if (grid[row + val][col] == EMPTY || grid[row + val][col] == STEAM) {
-                        grid[row + val][col] = WATER;
+                    if (grid[row - 1][col] == LAVA) {
+                        grid[row][col] = STEAM;
+                        grid[row - 1][col] = SAND;
+                    } else if (grid[row - 1][col] == EMPTY || grid[row - 1][col] == STEAM) {
+                        grid[row - 1][col] = WATER;
                         grid[row][col] = EMPTY;
                     }
                 }
             }
         }
-        else if(grid[row][col] == LAVA) {
+
+        row = a.nextInt(1,grid.length-1);
+        if(grid[row][col] == LAVA) {
             int lr = a.nextInt(0, 3); //decide which way to move
             if (col == 0) {
                 lr = a.nextInt(1, 3);
@@ -402,7 +399,11 @@ public class SandLab
                 grid[row + val][col] = LAVA;
             }
         }
-        else if(grid[row][col] == STEAM){
+        if(row == grid.length){
+            row = a.nextInt(1,grid.length-1);
+        }
+        row = a.nextInt(1,grid.length-1);
+        if(grid[row][col] == STEAM){
             /*if(row != 0) {
                 int temp = grid[row - 1][col];
                 grid[row - 1][col] = STEAM;
@@ -418,21 +419,22 @@ public class SandLab
                 } //right edge case
                 switch (lr) {
                     case 0 -> { //move left
-                        if (grid[row - val][col - 1] == EMPTY) {
-                            grid[row - val][col - 1] = STEAM;
+                        if (grid[row + 1][col - 1] == EMPTY) {
+                            grid[row + 1][col - 1] = STEAM;
                             grid[row][col] = EMPTY;
                         }
                     }
                     case 1 -> { //move right
-                        if (grid[row - val][col + 1] == EMPTY) {
-                            grid[row - val][col + 1] = STEAM;
+                        if (grid[row + 1][col + 1] == EMPTY) {
+                            grid[row + 1][col + 1] = STEAM;
                             grid[row][col] = EMPTY;
                         }
                     }
                     case 2 -> { //move up
-                        if (grid[row - val][col] == EMPTY) {
-                            grid[row - val][col] = STEAM;
-                            grid[row][col] = EMPTY;
+                        if (grid[row + 1][col] == EMPTY || grid[row+1][col] == WATER) {
+                            int temp = grid[row + 1][col];
+                            grid[row + 1][col] = STEAM;
+                            grid[row][col] = temp;
                         }
                     }
                 }
