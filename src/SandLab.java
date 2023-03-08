@@ -16,6 +16,7 @@ public class SandLab
     public static final int WATER = 3;
     public static final int LAVA = 4;
     public static final int STEAM = 5;
+    static int VALUE = 1;
 
     //do not add any more fields
     private int[][] grid;
@@ -81,7 +82,11 @@ public class SandLab
         int col = a.nextInt(grid[0].length);
 
         if(grid[row][col] == SAND) {
-            if (grid[row + 1][col] == EMPTY) {
+            if (grid[row + 1][col] == LAVA) {
+                grid[row][col] = LAVA;
+                grid[row + 1][col] = SAND;
+            }
+            else if (grid[row + 1][col] == EMPTY) {
                 grid[row][col] = EMPTY;
                 grid[row + 1][col] = SAND;
             }
@@ -121,42 +126,79 @@ public class SandLab
             }
         }
         else if(grid[row][col] == WATER){
-            int lr = a.nextInt(0,3);
+            int lr = a.nextInt(0,3); //decide which way to move
             if(col == 0){
                 lr = a.nextInt(1,3);
-            }
+            } //edge case left
             if(col == grid[0].length-1){
                 lr = 1 + (int) Math.pow(-1,a.nextInt(10));
-            }
+            } //edge case right
             switch (lr) {
-                case 0: //move left
-                    if (grid[row][col - 1] == EMPTY) {
+                case 0 -> { //move left
+                    if (grid[row][col - 1] == LAVA) {
+                        grid[row][col - 1] = STEAM;
+                        grid[row][col] = SAND;
+                    } else if (grid[row][col - 1] == EMPTY || grid[row][col - 1] == STEAM) {
                         grid[row][col - 1] = WATER;
                         grid[row][col] = EMPTY;
                     }
-                    break;
-                case 1:
-                    if (grid[row][col + 1] == EMPTY) {
+                }
+                case 1 -> {
+                    if (grid[row][col + 1] == LAVA) {
+                        grid[row][col + 1] = STEAM;
+                        grid[row][col] = SAND;
+                    } else if (grid[row][col + 1] == EMPTY || grid[row][col + 1] == STEAM) {
                         grid[row][col + 1] = WATER;
                         grid[row][col] = EMPTY;
                     }
-                    break;
-                case 2:
-                    if (grid[row + 1][col] == EMPTY) {
+                }
+                case 2 -> {
+                    if (grid[row + 1][col] == LAVA) {
+                        grid[row + 1][col] = STEAM;
+                        grid[row][col] = SAND;
+                    } else if (grid[row + 1][col] == EMPTY || grid[row + 1][col] == STEAM) {
                         grid[row + 1][col] = WATER;
                         grid[row][col] = EMPTY;
                     }
-                    break;
+                }
             }
         }
-        else if(grid[row][col] == LAVA){
-            if (grid[row + 1][col] == EMPTY) {
+        else if(grid[row][col] == LAVA) {
+            int lr = a.nextInt(0, 3); //decide which way to move
+            if (col == 0) {
+                lr = a.nextInt(1, 3);
+            } //edge case left
+            if (col == grid[0].length - 1) {
+                lr = 1 + (int) Math.pow(-1, a.nextInt(10));
+            } //edge case right
+            switch (lr) {
+                case 0 -> { //move left
+                    if (grid[row][col - 1] == EMPTY) {
+                        grid[row][col - 1] = LAVA;
+                        grid[row][col] = EMPTY;
+                    }
+                }
+                case 1 -> {
+                    if (grid[row][col + 1] == EMPTY) {
+                        grid[row][col + 1] = LAVA;
+                        grid[row][col] = EMPTY;
+                    }
+                }
+                case 2 -> {
+                    if (grid[row + 1][col] == EMPTY) {
+                        grid[row + 1][col] = LAVA;
+                        grid[row][col] = EMPTY;
+                    }
+                }
+            }
+
+            /*if (grid[row + 1][col] == EMPTY) {
                 grid[row][col] = EMPTY;
                 grid[row + 1][col] = LAVA;
-            }
-            else if (grid[row + 1][col] == WATER) {
-                grid[row][col] = EMPTY;
-                grid[row + 1][col] = STEAM;
+            }*/
+            if (grid[row + 1][col] == WATER) {
+                grid[row][col] = STEAM;
+                grid[row + 1][col] = SAND;
             }
             else if (grid[row + 1][col] == METAL) {
                 grid[row + 1][col] = LAVA;
@@ -167,13 +209,266 @@ public class SandLab
             }
         }
         else if(grid[row][col] == STEAM){
-            if(row != 0) {
+            /*if(row != 0) {
                 int temp = grid[row - 1][col];
                 grid[row - 1][col] = STEAM;
                 grid[row][col] = temp;
+            }*/
+            if(row != 0) {
+                int lr = a.nextInt(0, 3); //generate where to go
+                if (col == 0) {
+                    lr = a.nextInt(1, 3);
+                } //left edge case
+                if (col == grid[0].length - 1) {
+                    lr = 1 + (int) Math.pow(-1, a.nextInt(10));
+                } //right edge case
+                switch (lr) {
+                    case 0 -> { //move left
+                        if (grid[row - 1][col - 1] == EMPTY) {
+                            grid[row - 1][col - 1] = STEAM;
+                            grid[row][col] = EMPTY;
+                        }
+                    }
+                    case 1 -> { //move right
+                        if (grid[row - 1][col + 1] == EMPTY) {
+                            grid[row - 1][col + 1] = STEAM;
+                            grid[row][col] = EMPTY;
+                        }
+                    }
+                    case 2 -> { //move up
+                        if (grid[row - 1][col] == EMPTY) {
+                            grid[row - 1][col] = STEAM;
+                            grid[row][col] = EMPTY;
+                        }
+                    }
+                }
             }
         }
+
+        int c = 0; //counter for steam in top row
+        for (int i = 0; i < grid[0].length; i++) {
+            if(grid[0][i] == STEAM){
+                c++;
+            }
+            if(c > grid[0].length * 0.25){
+                for (int j = 0; j < grid[0].length; j++) {
+                    if(grid[0][j] == STEAM){
+                        grid[0][j] = WATER;
+                    }
+                }
+            }
+        } //reduce steam
     }
+
+    public void step2()
+    {
+        int val = 1;
+        Random a = new Random(); int row, col;
+        if(VALUE == -1) {
+            val = -1;
+            row = a.nextInt(-val,grid.length-1);
+            col = a.nextInt(grid[0].length);
+        }
+        else {
+            val = 1;
+            row = a.nextInt(grid.length-1);
+            col = a.nextInt(grid[0].length);
+        }
+
+        if(grid[row][col] == SAND) {
+            if (grid[row + val][col] == LAVA) {
+                grid[row][col] = LAVA;
+                grid[row + val][col] = SAND;
+            }
+            else if (grid[row + val][col] == EMPTY) {
+                grid[row][col] = EMPTY;
+                grid[row + val][col] = SAND;
+            }
+            else if (grid[row + val][col] == WATER) {
+                grid[row][col] = WATER;
+                grid[row + val][col] = SAND;
+            }
+            else if (grid[row + val][col] == SAND) {
+                if (col == 0) {
+                    if (grid[row + val][col + 1] == EMPTY) {
+                        grid[row + val][col + 1] = SAND;
+                        grid[row][col] = EMPTY;
+                    }
+                } //left boundary
+                else if (col == grid[0].length-1){
+                    if (grid[row + val][col - 1] == EMPTY) {
+                        grid[row + val][col - 1] = SAND;
+                        grid[row][col] = EMPTY;
+                    }
+                } //right boundary
+                else {
+                    if(grid[row + val][col + 1] == EMPTY){ //if down right is empty
+                        if(grid[row + val][col - 1] == EMPTY){
+                            grid[row+val][col + (int)Math.pow(-1,a.nextInt(10))] = SAND;
+                            grid[row][col] = EMPTY;
+                        } //if both are empty
+                        else {
+                            grid[row+val][col+1] = SAND;
+                            grid[row][col] = EMPTY;
+                        } //if only down right is empty
+                    }
+                    else if(grid[row + val][col - 1] == EMPTY){
+                        grid[row+val][col-1] = SAND;
+                        grid[row][col] = EMPTY;
+                    } //both cannot be empty, so if down left is empty
+                } //general case
+            }
+        }
+        if(grid[row+val][col] == WATER){
+            int lr = a.nextInt(0,3); //decide which way to move
+            if(col == 0){
+                lr = a.nextInt(1,3);
+            } //edge case left
+            if(col == grid[0].length-1){
+                lr = 1 + (int) Math.pow(-1,a.nextInt(10));
+            } //edge case right
+            switch (lr) {
+                case 0 -> { //move left
+                    if (grid[row][col - 1] == LAVA) {
+                        grid[row][col - 1] = STEAM;
+                        grid[row][col] = SAND;
+                    } else if (grid[row][col - 1] == EMPTY || grid[row][col - 1] == STEAM) {
+                        grid[row][col - 1] = WATER;
+                        grid[row][col] = EMPTY;
+                    }
+                }
+                case 1 -> {
+                    if (grid[row][col + 1] == LAVA) {
+                        grid[row][col + 1] = STEAM;
+                        grid[row][col] = SAND;
+                    } else if (grid[row][col + 1] == EMPTY || grid[row][col + 1] == STEAM) {
+                        grid[row][col + 1] = WATER;
+                        grid[row][col] = EMPTY;
+                    }
+                }
+                case 2 -> {
+                    if (grid[row + val][col] == LAVA) {
+                        grid[row + val][col] = STEAM;
+                        grid[row][col] = SAND;
+                    } else if (grid[row + val][col] == EMPTY || grid[row + val][col] == STEAM) {
+                        grid[row + val][col] = WATER;
+                        grid[row][col] = EMPTY;
+                    }
+                }
+            }
+        }
+        else if(grid[row][col] == LAVA) {
+            int lr = a.nextInt(0, 3); //decide which way to move
+            if (col == 0) {
+                lr = a.nextInt(1, 3);
+            } //edge case left
+            if (col == grid[0].length - 1) {
+                lr = 1 + (int) Math.pow(-1, a.nextInt(10));
+            } //edge case right
+            switch (lr) {
+                case 0 -> { //move left
+                    if (grid[row][col - 1] == EMPTY) {
+                        grid[row][col - 1] = LAVA;
+                        grid[row][col] = EMPTY;
+                    }
+                }
+                case 1 -> {
+                    if (grid[row][col + 1] == EMPTY) {
+                        grid[row][col + 1] = LAVA;
+                        grid[row][col] = EMPTY;
+                    }
+                }
+                case 2 -> {
+                    if (grid[row + val][col] == EMPTY) {
+                        grid[row + val][col] = LAVA;
+                        grid[row][col] = EMPTY;
+                    }
+                }
+            }
+
+            /*if (grid[row + 1][col] == EMPTY) {
+                grid[row][col] = EMPTY;
+                grid[row + 1][col] = LAVA;
+            }*/
+            if (grid[row + val][col] == WATER) {
+                grid[row][col] = STEAM;
+                grid[row + val][col] = SAND;
+            }
+            else if (grid[row + val][col] == METAL) {
+                grid[row + val][col] = LAVA;
+            }
+            else if(grid[row+val][col] == STEAM){
+                grid[row][col] = STEAM;
+                grid[row + val][col] = LAVA;
+            }
+        }
+        else if(grid[row][col] == STEAM){
+            /*if(row != 0) {
+                int temp = grid[row - 1][col];
+                grid[row - 1][col] = STEAM;
+                grid[row][col] = temp;
+            }*/
+            if(row != 0) {
+                int lr = a.nextInt(0, 3); //generate where to go
+                if (col == 0) {
+                    lr = a.nextInt(1, 3);
+                } //left edge case
+                if (col == grid[0].length - 1) {
+                    lr = 1 + (int) Math.pow(-1, a.nextInt(10));
+                } //right edge case
+                switch (lr) {
+                    case 0 -> { //move left
+                        if (grid[row - val][col - 1] == EMPTY) {
+                            grid[row - val][col - 1] = STEAM;
+                            grid[row][col] = EMPTY;
+                        }
+                    }
+                    case 1 -> { //move right
+                        if (grid[row - val][col + 1] == EMPTY) {
+                            grid[row - val][col + 1] = STEAM;
+                            grid[row][col] = EMPTY;
+                        }
+                    }
+                    case 2 -> { //move up
+                        if (grid[row - val][col] == EMPTY) {
+                            grid[row - val][col] = STEAM;
+                            grid[row][col] = EMPTY;
+                        }
+                    }
+                }
+            }
+        }
+
+        int c = 0; //counter for steam in top row
+        if(val == -1) {
+            for (int i = 0; i < grid[0].length; i++) {
+                if (grid[grid.length - 1][i] == STEAM) {
+                    c++;
+                }
+                if (c > grid[0].length * 0.25) {
+                    for (int j = 0; j < grid[0].length; j++) {
+                        if (grid[grid.length - 1][j] == STEAM) {
+                            grid[grid.length - 1][j] = WATER;
+                        }
+                    }
+                }
+            } //reduce steam
+        }
+        else {
+            for (int i = 0; i < grid[0].length; i++) {
+                if(grid[0][i] == STEAM){
+                    c++;
+                }
+                if(c > grid[0].length * 0.25){
+                    for (int j = 0; j < grid[0].length; j++) {
+                        if(grid[0][j] == STEAM){
+                            grid[0][j] = WATER;
+                        }
+                    }
+                }
+            }
+        }
+    } //invert stuff
 
     //do not modify
     public void run()
