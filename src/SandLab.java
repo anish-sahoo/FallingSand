@@ -15,8 +15,8 @@ public class SandLab
     public static final int SAND = 2;
     public static final int WATER = 3;
     public static final int LAVA = 4;
-    public static final int STEAM = 5;
-    public static int INVERT = 6;
+    public static final int INVERT = 5;
+    public static final int STEAM = 6;
     static int VALUE = 1;
 
     //do not add any more fields
@@ -32,7 +32,7 @@ public class SandLab
         names[SAND] = "Sand";
         names[WATER] = "Water";
         names[LAVA] = "Lava";
-        names[INVERT-1] = "Invert";
+        names[INVERT] = "Invert";
 
         display = new SandDisplay("Falling Sand", numRows, numCols, names);
         grid = new int[numRows][numCols];
@@ -41,10 +41,20 @@ public class SandLab
     //called when the user clicks on a location using the given tool
     private void locationClicked(int row, int col, int tool)
     {
-        if (grid[row][col] == EMPTY && tool != EMPTY) {
-            grid[row][col] = tool;
-        } else if (tool == EMPTY) {
-            grid[row][col] = EMPTY;
+        if(tool != INVERT) {
+            if (grid[row][col] == EMPTY && tool != EMPTY) {
+                grid[row][col] = tool;
+            } else if (tool == EMPTY) {
+                grid[row][col] = EMPTY;
+            }
+        }
+        else {
+            VALUE *= -1;
+            for (int i = 0; i < display.getSpeed(); i++) {
+                for (int j = 0; j < 70; j++) {
+                    step();
+                }
+            }
         }
     }
 
@@ -79,6 +89,10 @@ public class SandLab
     //causes one random particle to maybe do something.
     public void step()
     {
+        if(VALUE == -1){
+            step_neg();
+            return;
+        }
         Random a = new Random();
         int row = a.nextInt(grid.length-1);
         int col = a.nextInt(grid[0].length);
@@ -442,34 +456,18 @@ public class SandLab
         }
 
         int c = 0; //counter for steam in top row
-        if(val == -1) {
-            for (int i = 0; i < grid[0].length; i++) {
-                if (grid[grid.length - 1][i] == STEAM) {
-                    c++;
-                }
-                if (c > grid[0].length * 0.25) {
-                    for (int j = 0; j < grid[0].length; j++) {
-                        if (grid[grid.length - 1][j] == STEAM) {
-                            grid[grid.length - 1][j] = WATER;
-                        }
-                    }
-                }
-            } //reduce steam
-        }
-        else {
-            for (int i = 0; i < grid[0].length; i++) {
-                if(grid[0][i] == STEAM){
-                    c++;
-                }
-                if(c > grid[0].length * 0.25){
-                    for (int j = 0; j < grid[0].length; j++) {
-                        if(grid[0][j] == STEAM){
-                            grid[0][j] = WATER;
-                        }
+        for (int i = 0; i < grid[0].length; i++) {
+            if (grid[grid.length - 1][i] == STEAM) {
+                c++;
+            }
+            if (c > grid[0].length * 0.25) {
+                for (int j = 0; j < grid[0].length; j++) {
+                    if (grid[grid.length - 1][j] == STEAM) {
+                        grid[grid.length - 1][j] = WATER;
                     }
                 }
             }
-        }
+        } //reduce steam
     } //invert stuff
 
     //do not modify
