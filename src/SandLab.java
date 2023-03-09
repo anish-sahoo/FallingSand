@@ -15,8 +15,9 @@ public class SandLab
     public static final int SAND = 2;
     public static final int WATER = 3;
     public static final int LAVA = 4;
-    public static final int INVERT = 5;
-    public static final int STEAM = 6;
+    public static final int STEAM = 5;
+    public static final int INVERT = 6;
+
     static int VALUE = 1;
 
     //do not add any more fields
@@ -26,12 +27,13 @@ public class SandLab
     public SandLab(int numRows, int numCols)
     {
         String[] names;
-        names = new String[6];
+        names = new String[7];
         names[EMPTY] = "Empty";
         names[METAL] = "Metal";
         names[SAND] = "Sand";
         names[WATER] = "Water";
         names[LAVA] = "Lava";
+        names[STEAM] = "Steam";
         names[INVERT] = "Invert";
 
         display = new SandDisplay("Falling Sand", numRows, numCols, names);
@@ -87,7 +89,7 @@ public class SandLab
 
     //called repeatedly.
     //causes one random particle to maybe do something.
-    public void step()
+    public void step() //straight stuff
     {
         if(VALUE == -1){
             step_neg();
@@ -236,21 +238,26 @@ public class SandLab
                 } //right edge case
                 switch (lr) {
                     case 0 -> { //move left
-                        if (grid[row - 1][col - 1] == EMPTY) {
-                            grid[row - 1][col - 1] = STEAM;
+                        if (grid[row][col - 1] == EMPTY) {
+                            grid[row][col - 1] = STEAM;
                             grid[row][col] = EMPTY;
                         }
                     }
                     case 1 -> { //move right
-                        if (grid[row - 1][col + 1] == EMPTY) {
-                            grid[row - 1][col + 1] = STEAM;
+                        if (grid[row][col + 1] == EMPTY) {
+                            grid[row][col + 1] = STEAM;
                             grid[row][col] = EMPTY;
                         }
                     }
                     case 2 -> { //move up
-                        if (grid[row - 1][col] != METAL){//== EMPTY) {
-                            grid[row - 1][col] = STEAM;
+                        if(grid[row-1][col] == STEAM){
+                            grid[row-1][col] = STEAM;
                             grid[row][col] = EMPTY;
+                        }
+                        else if (grid[row - 1][col] != METAL){//== EMPTY) {
+                            int temp = grid[row - 1][col];
+                            grid[row - 1][col] = STEAM;
+                            grid[row][col] = temp;
                         }
                     }
                 }
@@ -262,7 +269,7 @@ public class SandLab
             if(grid[0][i] == STEAM){
                 c++;
             }
-            if(c > grid[0].length * 0.25){
+            if(c > grid[0].length * 0.5){
                 for (int j = 0; j < grid[0].length; j++) {
                     if(grid[0][j] == STEAM){
                         grid[0][j] = WATER;
@@ -272,7 +279,8 @@ public class SandLab
         } //reduce steam
     }
 
-    public void step_neg() {
+    public void step_neg() //invert stuff
+    {
         int val = -1;
         Random a = new Random(); int row, col;
         row = a.nextInt(grid.length);
@@ -411,11 +419,6 @@ public class SandLab
 
         row = a.nextInt(grid.length-1);
         if(grid[row][col] == STEAM){
-            /*if(row != 0) {
-                int temp = grid[row - 1][col];
-                grid[row - 1][col] = STEAM;
-                grid[row][col] = temp;
-            }*/
             if(row != grid.length-1) {
                 int lr = a.nextInt(0, 3); //generate where to go
                 if (col == 0) {
@@ -426,19 +429,23 @@ public class SandLab
                 } //right edge case
                 switch (lr) {
                     case 0 -> { //move left
-                        if (grid[row + 1][col - 1] == EMPTY) {
-                            grid[row + 1][col - 1] = STEAM;
+                        if (grid[row][col - 1] == EMPTY) {
+                            grid[row][col - 1] = STEAM;
                             grid[row][col] = EMPTY;
                         }
                     }
                     case 1 -> { //move right
-                        if (grid[row + 1][col + 1] == EMPTY) {
-                            grid[row + 1][col + 1] = STEAM;
+                        if (grid[row][col + 1] == EMPTY) {
+                            grid[row][col + 1] = STEAM;
                             grid[row][col] = EMPTY;
                         }
                     }
                     case 2 -> { //move up
-                        if (grid[row + 1][col] != METAL){ //== EMPTY || grid[row+1][col] == WATER) {
+                        if(grid[row+1][col] == STEAM){
+                            grid[row+1][col] = STEAM;
+                            grid[row][col] = EMPTY;
+                        }
+                        else if (grid[row + 1][col] != METAL){ //== EMPTY || grid[row+1][col] == WATER) {
                             int temp = grid[row + 1][col];
                             grid[row + 1][col] = STEAM;
                             grid[row][col] = temp;
@@ -453,7 +460,7 @@ public class SandLab
             if (grid[grid.length - 1][i] == STEAM) {
                 c++;
             }
-            if (c > grid[0].length * 0.25) {
+            if (c > grid[0].length * 0.5) {
                 for (int j = 0; j < grid[0].length; j++) {
                     if (grid[grid.length - 1][j] == STEAM) {
                         grid[grid.length - 1][j] = WATER;
@@ -461,7 +468,7 @@ public class SandLab
                 }
             }
         } //reduce steam
-    } //invert stuff
+    }
 
     //do not modify
     public void run()
